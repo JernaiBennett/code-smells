@@ -1,57 +1,79 @@
 class Nose:
     """
-    Creates a Nose which can smell. Might represent a Robot or Human nose.
+    Base class for noses which can smell.
     """
-
-    def __init__(self, allergies=None, is_robot=False, air_tank_capacity_liters=20):
+    def __init__(self, allergies=None):
         self.smelled_smells = set()
-        self.immune_response = False
-        self.is_robot = is_robot
         self.allergies = allergies or []
-        self.air_tank_capacity_liters = air_tank_capacity_liters
-        self.current_air_tank_level = 0
-        self.is_running = False
+
+    def smell(self, odor):
+        """Smell an odor."""
+        self.smelled_smells.add(odor)
+
+    def rest(self):
+        """Rest the nose. Does not reset the allergies list or set of past smells."""
+        pass
+
+    def get_smelled_smells(self):
+        """Return a copy of the set of previously encountered odors."""
+        return self.smelled_smells.copy()
+
+
+class HumanNose(Nose):
+    """Represents a human nose with allergy responses."""
+    
+    def __init__(self, allergies=None):
+        super().__init__(allergies)
+        self.immune_response = False
 
     def smell(self, odor):
         """
         Smell an odor.
-
-        Robots must have capacity in their air tank to smell.
         Humans must not have an active immune response to smell.
-        Cyborgs must have both capacity and no immune response to smell.
         """
-        if self.is_robot:
-            if self.current_air_tank_level < self.air_tank_capacity_liters:
-                self.smelled_smells.add(odor)
-                self.current_air_tank_level += 1
+        if not self.immune_response:
+            if odor in self.allergies:
+                self.immune_response = True
             else:
-                raise RuntimeError("Robot nose cannot smell when air tank is full.")
+                super().smell(odor)
         else:
-            if not self.immune_response:
-                if odor in self.allergies:
-                    self.immune_response = True
-                else:
-                    self.smelled_smells.add(odor)
-            else:
-                raise RuntimeError("Nose cannot smell when immune response is active.")
+            raise RuntimeError("Nose cannot smell when immune response is active.")
 
     def rest(self):
-        """
-        Rest the nose.
-
-        This resets the immune response for humans and air tank for robots, and both for cyborgs.
-
-        Does not reset the allergies list or set of past smells.
-        """
+        """Reset the immune response."""
         self.immune_response = False
-        self.current_air_tank_level = 0
-        self.is_running = False
 
-    def get_smelled_smells(self):
+
+class RobotNose(Nose):
+    """Represents a robot nose with air tank capacity."""
+    
+    def __init__(self, allergies=None, air_tank_capacity_liters=20):
+        super().__init__(allergies)
+        self.air_tank_capacity_liters = air_tank_capacity_liters
+        self.current_air_tank_level = 0
+
+    def smell(self, odor):
         """
-        Return a copy of the set of previously encountered odors.
+        Smell an odor.
+        Robots must have capacity in their air tank to smell.
         """
-        return self.smelled_smells.copy()
+        if self.current_air_tank_level < self.air_tank_capacity_liters:
+            super().smell(odor)
+            self.current_air_tank_level += 1
+        else:
+            raise RuntimeError("Robot nose cannot smell when air tank is full.")
+
+    def rest(self):
+        """Reset the air tank level."""
+        self.current_air_tank_level = 0
+
+
+def create_nose(allergies=None, is_robot=False, air_tank_capacity_liters=20):
+    """Factory function to create the appropriate nose type."""
+    if is_robot:
+        return RobotNose(allergies, air_tank_capacity_liters)
+    else:
+        return HumanNose(allergies)
 
 
 if __name__ == "__main__":

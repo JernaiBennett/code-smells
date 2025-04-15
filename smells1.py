@@ -1,25 +1,26 @@
 def calculate_total_price(items):
-    total = 0
-    for item in items:
-        if item == "apple":
-            total += 1.0
-        elif item == "banana":
-            total += 0.5
-        elif item == "cherry":
-            total += 0.75
-        elif item == "mango":
-            total += 1.00
-        elif item == "pineapple":
-            total += 1.50
-        elif item == "dragonfruit":
-            total += 2.00
-        elif item == "durian":
-            total += 2.75
-        else:
-            print("Unknown item: " + item)
-    if total >= 10:
-        total *= 0.9
+    """Calculate the total price of items with a discount for orders >= DISCOUNT_THRESHOLD."""
+    total = sum(ITEM_PRICES.get(item, 0) for item in items)
+    
+    if total >= DISCOUNT_THRESHOLD:
+        total *= (1 - DISCOUNT_RATE)
+    
     return total
+
+
+# Constants
+ITEM_PRICES = {
+    "apple": 1.0,
+    "banana": 0.5,
+    "cherry": 0.75,
+    "mango": 1.00,
+    "pineapple": 1.50,
+    "dragonfruit": 2.00,
+    "durian": 2.75
+}
+
+DISCOUNT_THRESHOLD = 10.0
+DISCOUNT_RATE = 0.1
 
 
 if __name__ == "__main__":
